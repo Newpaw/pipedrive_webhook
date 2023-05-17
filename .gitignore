@@ -1,0 +1,9 @@
+.env
+*.db
+.vscode/
+__pycache__/
+instance
+*.sqlite
+uploads
+*.log
+code.sh
