@@ -15,11 +15,11 @@ def process_data(data):
         new_ico = data['current'].get('7d2ccc518c77ec9a5cefc1d88ef617bf8b005586')
         for company in companies:
             if company.ico == str(new_ico):
-                company_ares = get_company_data_ares(str(company.ico))
+                company_ares = get_company_data_ares(str(company.ico.strip()))
                 print(company_ares.name)
                 change_company_data(
                     company_id=company.id_pipedrive,
-                    new_address=company_ares.address,
+                    new_address=f"{company_ares.address}, {company_ares.psc}",
                     new_ares_name=company_ares.name,
                     new_business_field=company_ares.business_fields,
                     new_legal_form=company_ares.legal_form,

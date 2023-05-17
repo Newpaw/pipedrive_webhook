@@ -104,18 +104,17 @@ def different_ico(data:json) -> bool:
 def main():
     #companies = get_companies()
     #for company in companies:
-    #    if company.ico == "29147506":
-    #        company_ares = get_company_data_ares(str(company.ico))
+    #    if company.ico:
+    #        company_ares = get_company_data_ares(str(company.ico.strip()))
     #        print(company_ares.name)
     #        change_company_data(
     #            company_id=company.id_pipedrive,
-    #            new_address=company_ares.address,
+    #            new_address=f"{company_ares.address}, {company_ares.psc}",
     #            new_ares_name=company_ares.name,
     #            new_business_field=company_ares.business_fields,
     #            new_legal_form=company_ares.legal_form,
     #            new_size=company_ares.size,
     #        )
     pass
-
 if __name__ == "__main__":
     main()
