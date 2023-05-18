@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import List
 import json
 import os
+from czso import czso_get_website_content, czso_parse_content
 
 @dataclass
 class Pipedrive_Company:
@@ -60,7 +61,7 @@ def change_company_data(
     new_size: str,
     new_address: str,
     new_business_field: str,
-    new_legal_form: str,
+    new_legal_form: str
 ):
     api_token = os.environ.get('API_TOKEN')
 
@@ -86,6 +87,29 @@ def change_company_data(
         print("Chyba při aktualizaci názvu společnosti.")
         print(response.json())
 
+def change_main_economic_activity_cz_nace(
+    company_id: int,
+    ares_main_economic_activity_cz_nace: str,
+):
+    api_token = os.environ.get('API_TOKEN')
+
+    url = (
+        f"https://api.pipedrive.com/v1/organizations/{company_id}?api_token={api_token}"
+    )
+    # Sestavte data pro aktualizaci názvu společnosti
+    data = {
+        "e0220d408af2bc5442d14a19eb366597272d57ae": ares_main_economic_activity_cz_nace,
+    }
+
+    # Poslat PUT požadavek na API
+    response = requests.put(url, json=data)
+
+    # Zkontrolovat odpověď a zpracovat výsledek
+    if response.status_code == 200:
+        pass
+    else:
+        print("Chyba při aktualizaci názvu společnosti.")
+        print(response.json())
 
 
 def different_ico(data:json) -> bool:
@@ -102,19 +126,35 @@ def different_ico(data:json) -> bool:
 
 
 def main():
-    #companies = get_companies()
-    #for company in companies:
-    #    if company.ico:
-    #        company_ares = get_company_data_ares(str(company.ico.strip()))
-    #        print(company_ares.name)
-    #        change_company_data(
-    #            company_id=company.id_pipedrive,
-    #            new_address=f"{company_ares.address}, {company_ares.psc}",
-    #            new_ares_name=company_ares.name,
-    #            new_business_field=company_ares.business_fields,
-    #            new_legal_form=company_ares.legal_form,
-    #            new_size=company_ares.size,
-    #        )
-    pass
+    companies = get_companies()
+    for company in companies:
+        if company.ico:
+            ico = str(company.ico.strip())
+            company_ares = get_company_data_ares(ico)
+            content = czso_get_website_content(ico)
+            if czso_parse_content(content):
+                ares_main_economic_activity_cz_nace = czso_parse_content(content)[0]
+                change_company_data(
+                    company_id=company.id_pipedrive,
+                    new_address=f"{company_ares.address}, {company_ares.psc}",
+                    new_ares_name=company_ares.name,
+                    new_business_field=company_ares.business_fields,
+                    new_legal_form=company_ares.legal_form,
+                    new_size=company_ares.size,
+                )
+                change_main_economic_activity_cz_nace(
+                    company_id=company.id_pipedrive,
+                    ares_main_economic_activity_cz_nace = ares_main_economic_activity_cz_nace,
+                )
+            else:
+                change_company_data(
+                    company_id=company.id_pipedrive,
+                    new_address=f"{company_ares.address}, {company_ares.psc}",
+                    new_ares_name=company_ares.name,
+                    new_business_field=company_ares.business_fields,
+                    new_legal_form=company_ares.legal_form,
+                    new_size=company_ares.size,
+                )
+
 if __name__ == "__main__":
     main()
