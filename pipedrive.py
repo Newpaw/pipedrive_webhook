@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List
 import json
 import os
-from czso import czso_get_website_content, czso_parse_content
+from czso import czso_get_website_content, czso_parse_content, czso_get_base_cz_nace
 
 @dataclass
 class Pipedrive_Company:
@@ -90,6 +90,7 @@ def change_company_data(
 def change_main_economic_activity_cz_nace(
     company_id: int,
     ares_main_economic_activity_cz_nace: str,
+    ares_based_main_economic_activity_cz_nace:str,
 ):
     api_token = os.environ.get('API_TOKEN')
 
@@ -99,6 +100,7 @@ def change_main_economic_activity_cz_nace(
     # Sestavte data pro aktualizaci názvu společnosti
     data = {
         "e0220d408af2bc5442d14a19eb366597272d57ae": ares_main_economic_activity_cz_nace,
+        "09b652932939205881a0618b334b87136ecef2d7": ares_based_main_economic_activity_cz_nace,
     }
 
     # Poslat PUT požadavek na API
@@ -145,7 +147,9 @@ def main():
                 change_main_economic_activity_cz_nace(
                     company_id=company.id_pipedrive,
                     ares_main_economic_activity_cz_nace = ares_main_economic_activity_cz_nace,
+                    ares_based_main_economic_activity_cz_nace=czso_get_base_cz_nace(str(ares_main_economic_activity_cz_nace)),
                 )
+                print(czso_get_base_cz_nace(str(ares_main_economic_activity_cz_nace)))
             else:
                 change_company_data(
                     company_id=company.id_pipedrive,
@@ -155,6 +159,7 @@ def main():
                     new_legal_form=company_ares.legal_form,
                     new_size=company_ares.size,
                 )
+                print(ico)
 
 if __name__ == "__main__":
     main()
