@@ -4,6 +4,7 @@ from threading import Thread
 from ares import get_company_data_ares
 from pipedrive import get_companies, change_company_data, different_ico, change_main_economic_activity_cz_nace
 from czso import czso_get_website_content, czso_parse_content, czso_get_base_cz_nace
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -48,6 +49,8 @@ def process_data(data):
 
 @app.route('/', methods=['GET'])
 def index():
+    current_dateTime = datetime.now()
+    print(f"{current_dateTime} someone hit the site.")
     return 'ok', 200
 
 
