@@ -17,5 +17,5 @@ COPY . .
 EXPOSE 5000
 
 # Start the application using Gunicorn
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "--workers", "2", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "--workers", "2", "--capture-output", "app:app"]
 

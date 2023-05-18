@@ -164,12 +164,13 @@ def czso_get_base_cz_nace(input_string:str) -> str:
 
 
 def main():
-    ico = "03739741"  # Replace this with any valid ICO
-    content = czso_get_website_content(ico)
-    cz_nace = czso_parse_content(content)[0]
-    print(cz_nace)
-    cz_nace_main = czso_get_base_cz_nace(str(cz_nace))
-    print(cz_nace_main)
+    #ico = "03739741"  # Replace this with any valid ICO
+    #content = czso_get_website_content(ico)
+    #cz_nace = czso_parse_content(content)[0]
+    #print(cz_nace)
+    #cz_nace_main = czso_get_base_cz_nace(str(cz_nace))
+    #print(cz_nace_main)
+    pass
     
 
 

@@ -20,6 +20,7 @@ def process_data(data):
                 content = czso_get_website_content(ico)
                 if czso_parse_content(content):
                     ares_main_economic_activity_cz_nace = czso_parse_content(content)[0]
+                    print(company.name)
                     change_company_data(
                         company_id=company.id_pipedrive,
                         new_address=f"{company_ares.address}, {company_ares.psc}",
@@ -34,6 +35,7 @@ def process_data(data):
                         ares_based_main_economic_activity_cz_nace = czso_get_base_cz_nace(str(ares_main_economic_activity_cz_nace)),
                     )
                 else:
+                    print(company.name)
                     change_company_data(
                         company_id=company.id_pipedrive,
                         new_address=f"{company_ares.address}, {company_ares.psc}",
