@@ -1,10 +1,16 @@
 import os
+import logging
 from flask import Flask, request
 from threading import Thread
 from ares import get_company_data_ares
 from pipedrive import get_companies, change_company_data, different_ico, change_main_economic_activity_cz_nace
 from czso import czso_get_website_content, czso_parse_content, czso_get_base_cz_nace
-from datetime import datetime
+
+
+logging.basicConfig(
+    format='[%(asctime)s +0000] [%(process)d] [%(levelname)s] %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S')
 
 app = Flask(__name__)
 
@@ -30,7 +36,7 @@ def process_data(data):
                 company_ares = get_company_data_ares(ico)
                 content = czso_get_website_content(ico)
                 parsed_content = czso_parse_content(content)
-                print(company.name)
+                logging.info(company.name)
                 process_common_data(company, company_ares)
                 if parsed_content:
                     ares_main_economic_activity_cz_nace = parsed_content[0]
@@ -42,8 +48,7 @@ def process_data(data):
 
 @app.route('/', methods=['GET'])
 def index():
-    current_dateTime = datetime.now()
-    print(f"{current_dateTime} someone hit the site.")
+    logging.info("Someone hit the site https://pipedriveares.mluvii.com/.")
     return 'ok', 200
 
 @app.route(f'/{WEBHOOK_URL}', methods=['POST'])
