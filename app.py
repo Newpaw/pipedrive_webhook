@@ -4,9 +4,8 @@ from flask import Flask, request
 from threading import Thread
 
 from ares import get_company_data_ares
-from pipedrive import get_companies, change_company_data, different_ico, change_main_economic_activity_cz_nace
+from pipedrive import get_companies, change_company_data, different_and_correct_ico, change_main_economic_activity_cz_nace
 from czso import czso_get_website_content, czso_parse_content, czso_get_base_cz_nace
-from verification import verify_ico
 
 logging.basicConfig(
     format='[%(asctime)s +0000] [%(process)d] [%(levelname)s] %(message)s',
@@ -28,7 +27,7 @@ def process_common_data(company, company_ares):
     )
 
 def process_data(data):
-    if different_ico(data):
+    if different_and_correct_ico(data):
         companies = get_companies()
         new_ico = data['current'].get('7d2ccc518c77ec9a5cefc1d88ef617bf8b005586')
         for company in companies:
