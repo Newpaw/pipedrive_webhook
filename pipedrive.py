@@ -1,10 +1,20 @@
-from ares import get_company_data_ares
-import requests
-from dataclasses import dataclass
-from typing import List
 import json
 import os
+import requests
+import logging
+
+from dataclasses import dataclass
+from typing import List
+
 from czso import czso_get_website_content, czso_parse_content, czso_get_base_cz_nace
+from ares import get_company_data_ares
+from verification import verify_ico
+
+logging.basicConfig(
+    format='[%(asctime)s +0000] [%(process)d] [%(levelname)s] %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S')
+
 
 @dataclass
 class Pipedrive_Company:
@@ -114,10 +124,14 @@ def change_main_economic_activity_cz_nace(
         print(response.json())
 
 
-def different_ico(data:json) -> bool:
+def different_and_correct_ico(data:json) -> bool:
     current_layer = data['current'].get('7d2ccc518c77ec9a5cefc1d88ef617bf8b005586')
     previous_layer = data['previous'].get('7d2ccc518c77ec9a5cefc1d88ef617bf8b005586')
-    if current_layer == previous_layer:
+    exist_the_ico = verify_ico(current_layer)
+
+    logging.info(f"The verification  for IČ {current_layer} is {exist_the_ico}")
+
+    if current_layer == previous_layer or not exist_the_ico:
         return False
     else:
         return True
