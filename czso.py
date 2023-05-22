@@ -1,7 +1,13 @@
+import logging
 import requests
 from bs4 import BeautifulSoup
 import unicodedata
-from typing import List
+
+logging.basicConfig(
+    format='[%(asctime)s +0000] [%(process)d] [%(levelname)s] %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S')
+
 
 def czso_get_website_content(ico:str):
     url = f"https://apl.czso.cz/res/detail?ico={ico}"
@@ -9,16 +15,17 @@ def czso_get_website_content(ico:str):
     try:
         response = requests.get(url)
         response.raise_for_status()  # If the response contains an HTTP error status code, raise an exception
+        return response.content
     except requests.RequestException as e: 
-        print(f"Error occurred: {e}")
+        logging.error(f"Error occurred: {e}")
         return None
 
-    return response.content
+    
 
 
 def czso_parse_content(content):
     if content is None:
-        print("No content to parse.")
+        logging.warning("No content to parse.")
         return None
 
     try:
@@ -30,13 +37,12 @@ def czso_parse_content(content):
 
         return normalized_data
     except Exception as e:
-        print(f"Error occurred while parsing: {e}")
+        logging.error(f"Error occurred while parsing: {e}")
         return None
 
 
-def czso_get_base_cz_nace(input_string:str) -> str:
-    # Slovník definující hlavní kategorie
-    categories = {
+def czso_get_categories():
+    return {
         'A': 'A - Zemědělství, lesnictví, rybářství',
         'B': 'B - Těžba a dobývání',
         'C': 'C - Zpracovatelský průmysl',
@@ -60,7 +66,10 @@ def czso_get_base_cz_nace(input_string:str) -> str:
         'U': 'U - Činnosti exteritoriálních organizací a orgánů',
     }
 
-    categories_num = {
+
+
+def czso_get_categories_num():
+    return {
         '01': 'A - Zemědělství, lesnictví, rybářství',
         '02': 'A - Zemědělství, lesnictví, rybářství',
         '03': 'A - Zemědělství, lesnictví, rybářství',
@@ -111,47 +120,51 @@ def czso_get_base_cz_nace(input_string:str) -> str:
         '53': 'H - Doprava a skladování',
         '55': 'I - Ubytování, stravování a pohostinství',
         '56': 'I - Ubytování, stravování a pohostinství',
-        '58':  'J - Informační a komunikační činnosti',
-        '59':  'J - Informační a komunikační činnosti',
-        '60':  'J - Informační a komunikační činnosti',
-        '61':  'J - Informační a komunikační činnosti',
-        '62':  'J - Informační a komunikační činnosti',
-        '63':  'J - Informační a komunikační činnosti',
-        '64':  'K - Peněžnictví a pojišťovnictví',
-        '65':  'K - Peněžnictví a pojišťovnictví',
-        '66':  'K - Peněžnictví a pojišťovnictví',
-        '68':  'L - Činnosti v oblasti nemovitostí',
-        '69':  'M - Profesní, vědecké a technické činnosti',
-        '70':  'M - Profesní, vědecké a technické činnosti',
-        '71':  'M - Profesní, vědecké a technické činnosti',
-        '72':  'M - Profesní, vědecké a technické činnosti',
-        '73':  'M - Profesní, vědecké a technické činnosti',
-        '74':  'M - Profesní, vědecké a technické činnosti',
-        '75':  'M - Profesní, vědecké a technické činnosti',
-        '77':  'N - Administrativní a podpůrné činnosti',
-        '78':  'N - Administrativní a podpůrné činnosti',
-        '79':  'N - Administrativní a podpůrné činnosti',
-        '80':  'N - Administrativní a podpůrné činnosti',
-        '81':  'N - Administrativní a podpůrné činnosti',
-        '82':  'N - Administrativní a podpůrné činnosti',
-        '84':  'O - Veřejná správa a obrana; povinné sociální zabezpečení',
-        '85':  'P - Vzdělávání', 
-        '86':  'Q - Zdravotní a sociální péče',
-        '87':  'Q - Zdravotní a sociální péče',
-        '88':  'Q - Zdravotní a sociální péče',  
-        '90':  'R - Kulturní, zábavní a rekreační činnosti',
-        '91':  'R - Kulturní, zábavní a rekreační činnosti',
-        '92':  'R - Kulturní, zábavní a rekreační činnosti',
-        '93':  'R - Kulturní, zábavní a rekreační činnosti',     
-        '94':  'S - Ostatní činnosti',
-        '95':  'S - Ostatní činnosti',
-        '96':  'S - Ostatní činnosti',     
-        '97':  'T - Činnosti domácností jako zaměstnavatelů; činnosti domácností produkujících blíže neurčené výrobky a služby pro vlastní potřebu',
-        '98':  'T - Činnosti domácností jako zaměstnavatelů; činnosti domácností produkujících blíže neurčené výrobky a služby pro vlastní potřebu',
+        '58': 'J - Informační a komunikační činnosti',
+        '59': 'J - Informační a komunikační činnosti',
+        '60': 'J - Informační a komunikační činnosti',
+        '61': 'J - Informační a komunikační činnosti',
+        '62': 'J - Informační a komunikační činnosti',
+        '63': 'J - Informační a komunikační činnosti',
+        '64': 'K - Peněžnictví a pojišťovnictví',
+        '65': 'K - Peněžnictví a pojišťovnictví',
+        '66': 'K - Peněžnictví a pojišťovnictví',
+        '68': 'L - Činnosti v oblasti nemovitostí',
+        '69': 'M - Profesní, vědecké a technické činnosti',
+        '70': 'M - Profesní, vědecké a technické činnosti',
+        '71': 'M - Profesní, vědecké a technické činnosti',
+        '72': 'M - Profesní, vědecké a technické činnosti',
+        '73': 'M - Profesní, vědecké a technické činnosti',
+        '74': 'M - Profesní, vědecké a technické činnosti',
+        '75': 'M - Profesní, vědecké a technické činnosti',
+        '77': 'N - Administrativní a podpůrné činnosti',
+        '78': 'N - Administrativní a podpůrné činnosti',
+        '79': 'N - Administrativní a podpůrné činnosti',
+        '80': 'N - Administrativní a podpůrné činnosti',
+        '81': 'N - Administrativní a podpůrné činnosti',
+        '82': 'N - Administrativní a podpůrné činnosti',
+        '84': 'O - Veřejná správa a obrana; povinné sociální zabezpečení',
+        '85': 'P - Vzdělávání', 
+        '86': 'Q - Zdravotní a sociální péče',
+        '87': 'Q - Zdravotní a sociální péče',
+        '88': 'Q - Zdravotní a sociální péče',  
+        '90': 'R - Kulturní, zábavní a rekreační činnosti',
+        '91': 'R - Kulturní, zábavní a rekreační činnosti',
+        '92': 'R - Kulturní, zábavní a rekreační činnosti',
+        '93': 'R - Kulturní, zábavní a rekreační činnosti',     
+        '94': 'S - Ostatní činnosti',
+        '95': 'S - Ostatní činnosti',
+        '96': 'S - Ostatní činnosti',     
+        '97': 'T - Činnosti domácností jako zaměstnavatelů; činnosti domácností produkujících blíže neurčené výrobky a služby pro vlastní potřebu',
+        '98': 'T - Činnosti domácností jako zaměstnavatelů; činnosti domácností produkujících blíže neurčené výrobky a služby pro vlastní potřebu',
         '99': 'U - Činnosti exteritoriálních organizací a orgánů',
 
     }
 
+def czso_get_base_cz_nace(input_string:str) -> str:
+
+    categories = czso_get_categories()
+    categories_num = czso_get_categories_num()
     first_character = input_string[0]
     first_two_characters = input_string[:2]
 
