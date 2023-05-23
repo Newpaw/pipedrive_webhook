@@ -56,7 +56,13 @@ def process_data(data):
 
 @app.route("/", methods=["GET"])
 def index():
-    logging.info("Someone hit the site https://pipedriveares.mluvii.com/.")
+    if "X-Forwarded-For" in request.headers:
+        client_ip = request.headers.getlist("X-Forwarded-For")[0].split(',')[0]
+        
+    else:
+        client_ip = request.remote_addr
+
+    logging.info(f"Someone from IP {client_ip} hit the site https://pipedriveares.mluvii.com/.")
     return "ok", 200
 
 
