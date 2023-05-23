@@ -3,3 +3,4 @@ requests
 Flask
 gunicorn
 bs4
+redis
