@@ -57,8 +57,12 @@ def index():
     return "ok", 200
 
 
-@app.route(f"/{WEBHOOK_URL}", methods=["POST"])
-def webhook():
+@app.route('/<path:subpath>', methods=["POST"])
+def webhook(subpath):
+    if subpath != WEBHOOK_URL:
+        logging.warning(f"{subpath} not allowed!")
+        return "Not Found", 404
+    
     data = request.get_json()
     if data is None:
         logging.error("Bad request received in webhook")
