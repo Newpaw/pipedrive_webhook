@@ -18,8 +18,7 @@ BASE_URL = "https://ares.novopacky.com/company/"
 @dataclass
 class AresCompany:
     """Dataclass for storing ARES company data."""
-
-    ico: str
+    ico: Optional[str]
     name: Optional[str]
     address: Optional[str]
     legal_form: Optional[str]

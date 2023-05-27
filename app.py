@@ -5,7 +5,7 @@ from threading import Thread
 from typing import Optional
 
 
-from pipedrive import Pipedrive_Company, get_pipedrive_companies, change_pipedrive_company_data
+from pipedrive import change_pipedrive_company_data
 from helper import different_and_correct_ico
 from api_my_ares import get_ares_companies
 
@@ -21,30 +21,21 @@ WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 
 
 def process_company(data):
+    company_id = data["meta"].get("id")
     new_ico = data["current"].get("7d2ccc518c77ec9a5cefc1d88ef617bf8b005586")
-    pipedrive_company = find_pipedrive_company(new_ico)
-    if pipedrive_company:
-        logging.debug(pipedrive_company)
-        ares_company = get_ares_companies(new_ico)
-        if ares_company:
-            change_pipedrive_company_data(
-                company_id=pipedrive_company.id_company,
-                new_ares_name=ares_company.name,
-                new_address=ares_company.address,
-                new_size=ares_company.size,
-                new_business_field='; '.join(ares_company.business_fields) if isinstance(ares_company.business_fields, list) else None,
-                new_legal_form=ares_company.legal_form,
-                ares_main_economic_activity_cz_nace=ares_company.main_cz_nace,
-                ares_based_main_economic_activity_cz_nace=ares_company.based_main_cz_nace
-            )
+    ares_company = get_ares_companies(new_ico)
+    if ares_company:
+        change_pipedrive_company_data(
+            company_id=company_id,
+            new_ares_name=ares_company.name,
+            new_address=ares_company.address,
+            new_size=ares_company.size,
+            new_business_field='; '.join(ares_company.business_fields) if isinstance(ares_company.business_fields, list) else None,
+            new_legal_form=ares_company.legal_form,
+            ares_main_economic_activity_cz_nace=ares_company.main_cz_nace,
+            ares_based_main_economic_activity_cz_nace=ares_company.based_main_cz_nace
+        )
 
-def find_pipedrive_company(ico: str) -> Optional[Pipedrive_Company]:
-    pipedrive_companies = get_pipedrive_companies()
-    for company in pipedrive_companies:
-        if company.ico == str(ico):
-            return company
-    logging.debug("No pipedrive company.")
-    return None
 
 def process_data(data):
     try:
