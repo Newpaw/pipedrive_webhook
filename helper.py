@@ -37,6 +37,15 @@ def different_and_correct_ico(data: json) -> bool:
         return False
     else:
         return True
+    
+def different_vat(data: json) -> bool:
+    current_layer = data["current"].get("29d4a8de55841cc13da1337ea8fd4b3278868c68")
+    previous_layer = data["previous"].get("29d4a8de55841cc13da1337ea8fd4b3278868c68")
+
+    if current_layer == previous_layer and current_layer is not None:
+        return False
+    else:
+        return True
 
 
 def main():
