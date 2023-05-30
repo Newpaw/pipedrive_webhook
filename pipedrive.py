@@ -74,21 +74,19 @@ def get_pipedrive_companies() -> List[Pipedrive_Company]:
 
 def change_pipedrive_company_data(
     company_id: int,
-    new_ares_name: str,
-    new_size: str,
-    new_address: str,
-    new_business_field: str,
-    new_legal_form: str,
-    ares_main_economic_activity_cz_nace: str,
-    ares_based_main_economic_activity_cz_nace:str,
+    new_ares_name: str = None,
+    new_size: str = None,
+    new_address: str = None,
+    new_business_field: str = None,
+    new_legal_form: str = None,
+    ares_main_economic_activity_cz_nace: str = None,
+    ares_based_main_economic_activity_cz_nace:str = None,
 ):
-    api_token = os.environ.get('API_TOKEN')
+    api_token = os.getenv('API_TOKEN')
+    url = f"https://api.pipedrive.com/v1/organizations/{company_id}?api_token={api_token}"
 
-    url = (
-        f"https://api.pipedrive.com/v1/organizations/{company_id}?api_token={api_token}"
-    )
-    # Sestavte data pro aktualizaci názvu společnosti
-    data = {
+    # Mapování klíčů na hodnoty
+    data_keys = {
         "3dbfb80ada1c97f7f448c152a235be8caac790ba": new_ares_name,
         "8ef4ed6f463f487c5602a4be1f6ebe7206770ed9": new_size,
         "b75689d548fb12a231391c7c6cab088d2ce82fe7": new_address,
@@ -98,14 +96,21 @@ def change_pipedrive_company_data(
         "09b652932939205881a0618b334b87136ecef2d7": ares_based_main_economic_activity_cz_nace,
     }
 
+    # Filtrujeme hodnoty, které nejsou None
+    data = {key: value for key, value in data_keys.items() if value is not None}
+
+    logging.info(data)
+    
     # Poslat PUT požadavek na API
     response = requests.put(url, json=data)
 
     # Zkontrolovat odpověď a zpracovat výsledek
     if response.status_code == 200:
-        logging.info(f"Company {new_ares_name} with company id {company_id} processed!")
+        logging.info(f"Company {new_ares_name if new_ares_name else 'unknown'} with company id {company_id} processed!")
     else:
         logging.error("Chyba při aktualizaci názvu společnosti!")
+
+
 
 
 

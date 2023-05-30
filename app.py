@@ -6,8 +6,8 @@ from typing import Optional
 
 
 from pipedrive import change_pipedrive_company_data
-from helper import different_and_correct_ico
-from api_my_ares import get_ares_companies
+from helper import different_and_correct_ico, different_vat
+from api_my_ares import get_ares_companies, get_companies_by_vat
 
 logging.basicConfig(
     format="[%(asctime)s +0000] [%(process)d] [%(levelname)s] %(message)s",
@@ -23,6 +23,7 @@ WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
 def process_company(data):
     company_id = data["meta"].get("id")
     new_ico = data["current"].get("7d2ccc518c77ec9a5cefc1d88ef617bf8b005586")
+    new_vat = data["current"].get("29d4a8de55841cc13da1337ea8fd4b3278868c68")
     ares_company = get_ares_companies(new_ico)
     if ares_company:
         change_pipedrive_company_data(
@@ -35,11 +36,20 @@ def process_company(data):
             ares_main_economic_activity_cz_nace=ares_company.main_cz_nace,
             ares_based_main_economic_activity_cz_nace=ares_company.based_main_cz_nace
         )
+    vat_company = get_companies_by_vat(new_vat)
+
+    if vat_company:
+        change_pipedrive_company_data(
+            company_id=company_id,
+            new_ares_name=vat_company.name,
+            new_address=vat_company.address
+        )
+
 
 
 def process_data(data):
     try:
-        if different_and_correct_ico(data):
+        if different_and_correct_ico(data) or different_vat(data):
             process_company(data)
     except Exception as e:
         logging.error(f"Error processing data: {e}")

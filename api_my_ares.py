@@ -12,18 +12,19 @@ logging.basicConfig(
 )
 
 
-BASE_URL = "https://ares.novopacky.com/company/"
+BASE_URL = "https://ares.novopacky.com/"
 
 
 @dataclass
 class AresCompany:
     """Dataclass for storing ARES company data."""
-    ico: Optional[str]
-    name: Optional[str]
-    address: Optional[str]
-    legal_form: Optional[str]
-    business_fields: Optional[List[str]]
-    size: Optional[str]
+
+    ico: Optional[str] = None
+    name: Optional[str] = None
+    address: Optional[str] = None
+    legal_form: Optional[str] = None
+    business_fields: Optional[List[str]] = None
+    size: Optional[str] = None
     main_cz_nace: Optional[str] = None
     based_main_cz_nace: Optional[str] = None
 
@@ -35,7 +36,7 @@ def get_ares_companies(ico: str) -> Optional[AresCompany]:
     :return: AresCompany object if successful, None otherwise.
     """
     strip_ico = str(ico).strip()
-    url = f"{BASE_URL}{strip_ico}"
+    url = f"{BASE_URL}company/{strip_ico}"
     headers = {"accept": "application/json"}
 
     try:
@@ -67,6 +68,27 @@ def get_ares_companies(ico: str) -> Optional[AresCompany]:
         based_main_cz_nace=data.get("based_main_cz_nace"),
     )
 
+
+def get_companies_by_vat(vat_number: str) -> Optional[AresCompany]:
+    stripet_vat_number = str(vat_number).strip()
+    url = f"{BASE_URL}companyVAT/{stripet_vat_number}"
+    headers = {"accept": "application/json"}
+
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+    except requests.HTTPError as http_err:
+        logging.error(f"HTTP error occurred for VAT {stripet_vat_number}: {http_err}")
+        return None
+    except requests.RequestException as err:  # More specific exception
+        logging.error(f"An error occurred for VAT {stripet_vat_number}: {err}")
+        return None
+
+    logging.info(f"Response 200 for VAT {stripet_vat_number}.")
+    data = response.json()
+
+    return AresCompany(name=data.get("name"), address=data.get("address"))
+    
 
 def main():
     pass
